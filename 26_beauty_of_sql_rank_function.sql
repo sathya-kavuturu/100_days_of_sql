@@ -1,0 +1,37 @@
+--Find cities where the covid cases are increasing continuosly
+
+USE DaysOfSQL;
+
+create table covid(city varchar(50),days date,cases int);
+delete from covid;
+insert into covid values('DELHI','2022-01-01',100);
+insert into covid values('DELHI','2022-01-02',200);
+insert into covid values('DELHI','2022-01-03',300);
+
+insert into covid values('MUMBAI','2022-01-01',100);
+insert into covid values('MUMBAI','2022-01-02',100);
+insert into covid values('MUMBAI','2022-01-03',300);
+
+insert into covid values('CHENNAI','2022-01-01',100);
+insert into covid values('CHENNAI','2022-01-02',200);
+insert into covid values('CHENNAI','2022-01-03',150);
+
+insert into covid values('BANGALORE','2022-01-01',100);
+insert into covid values('BANGALORE','2022-01-02',300);
+insert into covid values('BANGALORE','2022-01-03',200);
+insert into covid values('BANGALORE','2022-01-04',400);
+
+SELECT * FROM covid
+
+WITH rn AS(
+    SELECT *,
+    RANK() OVER(PARTITION BY city ORDER BY days) AS rank_days,
+    RANK() OVER(PARTITION BY city ORDER BY cases) AS rank_cases,
+    RANK() OVER(PARTITION BY city ORDER BY days) - RANK() OVER(PARTITION BY city ORDER BY cases) AS diff
+     FROM covid
+)
+
+SELECT city
+FROM rn
+GROUP BY city
+HAVING COUNT(DISTINCT diff) = 1 AND MAX(diff)=0
